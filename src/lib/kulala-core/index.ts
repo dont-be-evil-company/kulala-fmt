@@ -2,12 +2,15 @@ import { spawnSync } from 'child_process';
 import { downloader } from '../downloader';
 import { configparser } from '../configparser';
 import type { KulalaParsedDocument } from './types';
+import type { Config } from '../configparser';
 
 export type { KulalaParsedDocument } from './types';
 
 export type FormatOptions = {
   formatBody?: boolean;
   filepath?: string;
+  kulalaCoreExecutablePath?: string;
+  config?: Config;
 };
 
 type FormatSuccess = {
@@ -24,10 +27,12 @@ type FormatResponse = FormatSuccess | FormatFailure;
 
 let cachedExecutable: string | null = null;
 
-async function executablePath(): Promise<string> {
-  if (!cachedExecutable) {
-    cachedExecutable = await downloader.ensureInstalled();
+async function executablePath(override?: string): Promise<string> {
+  if (override && override.trim()) {
+    cachedExecutable = override.trim();
+    return cachedExecutable;
   }
+  if (!cachedExecutable) cachedExecutable = await downloader.ensureInstalled();
   return cachedExecutable;
 }
 
@@ -62,8 +67,8 @@ function invoke(payload: Record<string, unknown>): unknown {
 }
 
 export async function formatHttp(content: string, options: FormatOptions = {}): Promise<string> {
-  await executablePath();
-  const config = configparser.parse();
+  await executablePath(options.kulalaCoreExecutablePath);
+  const config = options.config ?? configparser.parse();
 
   const response = invoke({
     action: 'format',
