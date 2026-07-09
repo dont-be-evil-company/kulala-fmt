@@ -34,6 +34,17 @@ const DEFAULT_CONFIG: Config = {
   },
 };
 
+function findConfigFile(startDir?: string): string | null {
+  let dir = path.resolve(startDir ?? process.cwd());
+  while (true) {
+    const candidate = path.join(dir, CONFIG_FILENAME);
+    if (fs.existsSync(candidate)) return candidate;
+    const parent = path.dirname(dir);
+    if (parent === dir) return null;
+    dir = parent;
+  }
+}
+
 const init = (): void => {
   const file = path.join(process.cwd(), CONFIG_FILENAME);
   const configHeader = `# yaml-language-server: $schema=https://kulala.app/kulala-fmt.schema.json\n---\n`;
@@ -60,9 +71,9 @@ const init = (): void => {
   }
 };
 
-const parse = (): Config => {
-  const file = path.join(process.cwd(), CONFIG_FILENAME);
-  if (!fs.existsSync(file)) {
+const parse = (opts?: { startDir?: string }): Config => {
+  const file = findConfigFile(opts?.startDir);
+  if (!file) {
     return DEFAULT_CONFIG;
   }
   const content = fs.readFileSync(file, 'utf8');

@@ -1,6 +1,6 @@
 {
   "name": "@mistweaverco/kulala-fmt",
-  "version": "4.4.0",
+  "version": "4.5.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/mistweaverco/kulala-fmt"
@@ -10,17 +10,20 @@
   },
   "files": [
     "dist/cli.cjs",
-    "dist/install-backend.cjs"
+    "dist/api.cjs"
   ],
   "type": "module",
+  "exports": {
+    ".": "./dist/api.cjs",
+    "./api": "./dist/api.cjs"
+  },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
     "build": "tsx ./scripts/build.ts",
     "lint": "vp lint",
-    "prepare": "vp config && tsx ./scripts/build.ts || true",
-    "postinstall": "node dist/install-backend.cjs || true"
+    "prepare": "vp config && tsx ./scripts/build.ts || true"
   },
   "devDependencies": {
     "@types/js-yaml": "4.0.9",
