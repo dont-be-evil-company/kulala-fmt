@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import yaml from 'js-yaml';
+import { load as yamlLoad, dump as yamlDump } from 'js-yaml';
 import chalk from 'chalk';
 import readline from 'readline';
 
@@ -56,7 +56,7 @@ const init = (): void => {
     });
     rl.question(`Do you want to overwrite the file? (y/N) `, (answer: string) => {
       if (answer.toLowerCase() === 'y') {
-        fs.writeFileSync(file, configHeader + yaml.dump(DEFAULT_CONFIG));
+        fs.writeFileSync(file, configHeader + yamlDump(DEFAULT_CONFIG));
         console.log(chalk.green(`🦄 Config file written: ${file}`));
       } else if (answer.toLowerCase() === 'n') {
         console.log(chalk.yellow('🦄 Exiting...'));
@@ -66,7 +66,7 @@ const init = (): void => {
       rl.close();
     });
   } else {
-    fs.writeFileSync(file, configHeader + yaml.dump(DEFAULT_CONFIG));
+    fs.writeFileSync(file, configHeader + yamlDump(DEFAULT_CONFIG));
     console.log(chalk.green(`🦄 Config file written: ${file}`));
   }
 };
@@ -77,7 +77,7 @@ const parse = (opts?: { startDir?: string }): Config => {
     return DEFAULT_CONFIG;
   }
   const content = fs.readFileSync(file, 'utf8');
-  const json = yaml.load(content) as Partial<Config>;
+  const json = yamlLoad(content) as Partial<Config>;
   return {
     defaults: { ...DEFAULT_CONFIG.defaults, ...json.defaults },
     body: {

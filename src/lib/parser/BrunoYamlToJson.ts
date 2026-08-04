@@ -1,4 +1,4 @@
-import yaml from 'js-yaml';
+import { load as yamlLoad } from 'js-yaml';
 
 interface YamlHeader {
   name?: string;
@@ -132,7 +132,7 @@ export interface BrunoYamlRequest {
   tests?: string;
 }
 
-const parseYaml = (content: string): unknown => yaml.load(content);
+const parseYaml = (content: string): unknown => yamlLoad(content);
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);

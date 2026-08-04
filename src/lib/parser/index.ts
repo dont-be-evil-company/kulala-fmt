@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
-import yaml from 'js-yaml';
+import { load as yamlLoad } from 'js-yaml';
 import { fileWalker } from './../filewalker';
 import { DocumentBuilder } from './DocumentBuilder';
 import { Diff } from './Diff';
@@ -28,7 +28,7 @@ const BrunoParser = new BrunoDocumentParser();
 const getOpenAPISpecAsJSON = (filepath: string): OpenAPISpec => {
   let raw: unknown;
   if (filepath.endsWith('.yaml') || filepath.endsWith('.yml')) {
-    raw = yaml.load(fs.readFileSync(filepath, 'utf-8'));
+    raw = yamlLoad(fs.readFileSync(filepath, 'utf-8'));
   } else {
     raw = JSON.parse(fs.readFileSync(filepath, 'utf-8'));
   }

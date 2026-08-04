@@ -8,6 +8,16 @@
   "bin": {
     "kulala-fmt": "dist/cli.cjs"
   },
+  "workspaces": {
+    "packages": [
+      "."
+    ],
+    "catalog": {
+      "vite": "npm:@voidzero-dev/vite-plus-core@latest",
+      "vitest": "npm:@voidzero-dev/vite-plus-test@latest",
+      "vite-plus": "0.1.24"
+    }
+  },
   "files": [
     "dist/cli.cjs",
     "dist/api.cjs",
@@ -22,43 +32,32 @@
     "access": "public"
   },
   "scripts": {
-    "postinstall": "node dist/postinstall.cjs || true",
+    "postinstall": "node -e \"require('node:fs').existsSync('dist/postinstall.cjs')&&require('./dist/postinstall.cjs')\"",
     "build": "tsx ./scripts/build.ts",
     "lint": "vp lint",
     "prepare": "vp config && tsx ./scripts/build.ts || true"
   },
   "devDependencies": {
-    "@types/js-yaml": "4.0.9",
-    "@types/node": "25.9.1",
-    "chalk": "5.6.2",
+    "@types/node": "26.1.2",
+    "chalk": "6.0.0",
     "colors": "1.4.0",
     "commander": "15.0.0",
-    "conventional-changelog": "7.2.0",
+    "conventional-changelog": "8.1.0",
     "diff": "9.0.0",
     "eslint-plugin-prettier": "5.5.6",
-    "globals": "17.6.0",
-    "js-yaml": "4.2.0",
+    "globals": "17.9.0",
+    "js-yaml": "5.2.3",
     "lodash": "4.18.1",
     "ohm-js": "17.5.0",
     "picocolors": "1.1.1",
-    "prettier": "3.8.4",
-    "tsx": "4.22.4",
-    "typescript": "5.9.3",
+    "prettier": "3.9.6",
+    "tsx": "4.23.5",
+    "typescript": "7.0.2",
     "vite-plus": "catalog:"
-  },
-  "packageManager": "pnpm@11.5.2",
-  "workspaces": {
-    "packages": [
-      "."
-    ],
-    "catalog": {
-      "vite": "npm:@voidzero-dev/vite-plus-core@latest",
-      "vitest": "npm:@voidzero-dev/vite-plus-test@latest",
-      "vite-plus": "0.1.24"
-    }
   },
   "overrides": {
     "vite": "catalog:",
     "vitest": "catalog:"
-  }
+  },
+  "packageManager": "pnpm@11.5.2"
 }
