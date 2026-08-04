@@ -10,7 +10,8 @@
   },
   "files": [
     "dist/cli.cjs",
-    "dist/api.cjs"
+    "dist/api.cjs",
+    "dist/postinstall.cjs"
   ],
   "type": "module",
   "exports": {
@@ -21,6 +22,7 @@
     "access": "public"
   },
   "scripts": {
+    "postinstall": "node dist/postinstall.cjs || true",
     "build": "tsx ./scripts/build.ts",
     "lint": "vp lint",
     "prepare": "vp config && tsx ./scripts/build.ts || true"

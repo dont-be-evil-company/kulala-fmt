@@ -47,7 +47,7 @@
             echo "Kulala formatter development environment"
             echo "Run 'pnpm install' to install dependencies"
             echo "Run 'pnpm run build' to build the project"
-            echo "Run 'node ./dist/install-backend.cjs' to download kulala-core""
+            echo "Run 'node ./dist/postinstall.cjs' to download kulala-core"
           '';
         };
       };

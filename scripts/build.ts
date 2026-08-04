@@ -44,3 +44,4 @@ function nodeBundle(entry: string, outFile: string, emptyOutDir?: boolean | null
 
 await build(nodeBundle('src/index.ts', 'cli.cjs', true));
 await build(nodeBundle('src/api.ts', 'api.cjs', false));
+await build(nodeBundle('src/postinstall.ts', 'postinstall.cjs', false));

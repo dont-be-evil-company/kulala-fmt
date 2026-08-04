@@ -6,7 +6,7 @@ import { tryInstallBackend } from './lib/downloader';
 const packageRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 // Published packages only ship dist/; skip when installing from a source checkout.
-if (existsSync(join(packageRoot, 'scripts', 'build.mjs'))) {
+if (existsSync(join(packageRoot, 'scripts', 'build.ts'))) {
   process.exit(0);
 }
 
