@@ -29,8 +29,7 @@ An opinionated 🦄 .http and .rest 🐼 files linter 💄 and formatter ⚡.
 [Kulala for Neovim][kulala.nvim] •
 [Kulala CLI][kulala-cli] •
 [Kulala Desktop][kulala-desktop] •
-[Kulala for Visual Studio Code][kulala.vscode] •
-[Kulala Core][kulala-core]
+[Kulala for Visual Studio Code][kulala-code] •
 [Kulala Github Action][kulala-github-action]
 
 ---
@@ -42,10 +41,10 @@ An opinionated 🦄 .http and .rest 🐼 files linter 💄 and formatter ⚡.
 You can install kulala-fmt globally using `npm`, `bun`, `yarn` or `pnpm`:
 
 ```sh
-npm install -g @mistweaverco/kulala-fmt
-bun add -g @mistweaverco/kulala-fmt
-yarn global add @mistweaverco/kulala-fmt
-pnpm add -g @mistweaverco/kulala-fmt
+npm install -g @dont-be-evil-company/kulala-fmt
+bun add -g @dont-be-evil-company/kulala-fmt
+yarn global add @dont-be-evil-company/kulala-fmt
+pnpm add -g @dont-be-evil-company/kulala-fmt
 ```
 
 You can also run it directly without installation using
@@ -53,13 +52,22 @@ You can also run it directly without installation using
 `npx`, `bunx`, `yarn dlx` or `pnpx`:
 
 ```sh
-npx @mistweaverco/kulala-fmt fix file.http
-bunx @mistweaverco/kulala-fmt fix file.http
-yarn dlx @mistweaverco/kulala-fmt fix file.http
-pnpx @mistweaverco/kulala-fmt fix file.http
+npx @dont-be-evil-company/kulala-fmt fix file.http
+bunx @dont-be-evil-company/kulala-fmt fix file.http
+yarn dlx @dont-be-evil-company/kulala-fmt fix file.http
+pnpx @dont-be-evil-company/kulala-fmt fix file.http
 ```
 
-On install, kulala-fmt downloads a matching [kulala-core](https://github.com/mistweaverco/kulala-core) binary automatically. If install scripts are disabled (for example `npm install --ignore-scripts`), the binary is downloaded on first use instead.
+On install, `kulala-fmt` downloads a
+matching `kulala-core` binary from `https://core.kulala.app`.
+
+Set `KULALA_CORE_LICENSE_TOKEN` to skip the license prompt.
+
+If that variable is unset and no token has been saved,
+the first run asks for one.
+
+If install scripts are disabled (for example `npm install --ignore-scripts`),
+the binary is downloaded on first use instead.
 
 To use your own kulala-core binary, set `KULALA_CORE_PATH`:
 
@@ -302,24 +310,23 @@ return {
 }
 ```
 
-[logo]: https://raw.githubusercontent.com/mistweaverco/kulala-fmt/main/logo.svg
-[discord]: https://mistweaverco.com/discord
-[badge-discord]: https://mistweaverco.com/assets/badges/discord.svg
-[badge-github]: https://img.shields.io/github/v/release/mistweaverco/kulala-fmt?style=for-the-badge
-[link-github]: https://github.com/mistweaverco/kulala-fmt/releases/latest
-[badge-npm]: https://img.shields.io/npm/v/@mistweaverco/kulala-fmt?style=for-the-badge
-[link-npm]: https://www.npmjs.com/package/@mistweaverco/kulala-fmt
-[badge-made-with-love]: https://mistweaverco.com/assets/badges/made-with-love.svg
-[contributors]: https://github.com/mistweaverco/kulala-fmt/graphs/contributors
-[kulala.nvim]: https://github.com/mistweaverco/kulala.nvim
-[kulala-cli]: https://github.com/mistweaverco/kulala-cli
-[kulala-desktop]: https://github.com/mistweaverco/kulala-desktop
-[kulala.vscode]: https://github.com/mistweaverco/kulala.vscode
-[kulala-core]: https://github.com/mistweaverco/kulala-core
-[kulala-github-action]: https://github.com/mistweaverco/kulala-github-action
-[badge-development-status]: https://mistweaverco.com/assets/badges/development-status.svg
-[development-status]: https://mistweaverco.com/roadmap?filter=kulala-fmt
-[badge-ai-policy]: https://mistweaverco.com/assets/badges/ai-policy.svg
-[ai-policy]: https://mistweaverco.com/ai-policy
-[badge-our-manifesto]: https://mistweaverco.com/assets/badges/our-manifesto.svg
-[our-manifesto]: https://mistweaverco.com/manifesto
+[logo]: https://raw.githubusercontent.com/dont-be-evil-company/kulala-fmt/main/logo.svg
+[discord]: https://the-dont-be-evil-company.com/discord
+[badge-discord]: https://the-dont-be-evil-company.com/assets/badges/discord.svg
+[badge-github]: https://img.shields.io/github/v/release/dont-be-evil-company/kulala-fmt?style=for-the-badge
+[link-github]: https://github.com/dont-be-evil-company/kulala-fmt/releases/latest
+[badge-npm]: https://img.shields.io/npm/v/@dont-be-evil-company/kulala-fmt?style=for-the-badge
+[link-npm]: https://www.npmjs.com/package/@dont-be-evil-company/kulala-fmt
+[badge-made-with-love]: https://the-dont-be-evil-company.com/assets/badges/made-with-love.svg
+[contributors]: https://github.com/dont-be-evil-company/kulala-fmt/graphs/contributors
+[kulala.nvim]: https://github.com/dont-be-evil-company/kulala.nvim
+[kulala-cli]: https://github.com/dont-be-evil-company/kulala-cli
+[kulala-desktop]: https://github.com/dont-be-evil-company/kulala-desktop
+[kulala-code]: https://github.com/dont-be-evil-company/kulala-code
+[kulala-github-action]: https://github.com/dont-be-evil-company/kulala-github-action
+[badge-development-status]: https://the-dont-be-evil-company.com/assets/badges/development-status.svg
+[development-status]: https://the-dont-be-evil-company.com/roadmap?filter=kulala-fmt
+[badge-ai-policy]: https://the-dont-be-evil-company.com/assets/badges/ai-policy.svg
+[ai-policy]: https://the-dont-be-evil-company.com/ai-policy
+[badge-our-manifesto]: https://the-dont-be-evil-company.com/assets/badges/our-manifesto.svg
+[our-manifesto]: https://the-dont-be-evil-company.com/manifesto

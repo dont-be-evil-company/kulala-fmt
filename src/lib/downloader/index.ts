@@ -1,11 +1,19 @@
+import { execFile } from 'node:child_process';
 import fs from 'fs';
 import path from 'path';
 import { chmodSync, createWriteStream } from 'fs';
 import { pipeline } from 'stream/promises';
 import { KULALA_CORE_VERSION } from '../../versions/backend';
+import {
+  KULALA_CORE_DOWNLOAD_URL,
+  LICENSE_TOKEN_HELP,
+  readSavedLicenseToken,
+  throwIfLicenseRejected,
+  withLicenseToken,
+} from './license-token';
 
 const BINARY_NAME = 'kulala-core';
-const DOWNLOAD_URL = 'https://github.com/mistweaverco/kulala-core/releases/download/v%s/%s';
+const DOWNLOAD_URL = KULALA_CORE_DOWNLOAD_URL;
 
 function platform(): string {
   const os =
@@ -64,6 +72,68 @@ function makeExecutable(filePath: string): void {
   }
 }
 
+const VERSION_PROBE_TIMEOUT_MS = 15_000;
+
+function firstOutputLine(stdout: string): string {
+  for (const line of stdout.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (trimmed) return trimmed;
+  }
+  return '';
+}
+
+function runVersion(binPath: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    execFile(
+      binPath,
+      ['--version'],
+      { timeout: VERSION_PROBE_TIMEOUT_MS, windowsHide: true },
+      (error, stdout) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        if (!firstOutputLine(stdout)) {
+          reject(new Error('kulala-core --version produced no output'));
+          return;
+        }
+        resolve();
+      },
+    );
+  });
+}
+
+function clearQuarantine(binPath: string): Promise<void> {
+  return new Promise((resolve) => {
+    execFile('xattr', ['-d', 'com.apple.quarantine', binPath], { timeout: 5_000 }, () => {
+      resolve();
+    });
+  });
+}
+
+async function assertCoreStarts(binPath: string): Promise<void> {
+  try {
+    await runVersion(binPath);
+    return;
+  } catch (error) {
+    if (process.platform === 'darwin') {
+      await clearQuarantine(binPath);
+      try {
+        await runVersion(binPath);
+        return;
+      } catch {
+        fs.rmSync(binPath, { force: true });
+        throw new Error(
+          'macOS refused to start kulala-core. The downloaded binary is signed incorrectly or blocked by Gatekeeper.',
+        );
+      }
+    }
+    fs.rmSync(binPath, { force: true });
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(`kulala-core --version failed. The downloaded binary did not start. ${detail}`);
+  }
+}
+
 const SPINNER_FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'] as const;
 
 function isInteractiveTerminal(): boolean {
@@ -117,8 +187,11 @@ function createDownloadProgress(): DownloadProgress {
   };
 }
 
-async function downloadFile(url: string, outputPath: string): Promise<void> {
-  const response = await fetch(url);
+async function downloadFile(url: string, outputPath: string, token: string): Promise<void> {
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  throwIfLicenseRejected(response.status);
   if (!response.ok || !response.body) {
     throw new Error(
       `Failed to download kulala-core from ${url}: ${response.status} ${response.statusText}`,
@@ -139,7 +212,7 @@ function removeStaleBinary(): void {
   }
 }
 
-export async function installBackend(): Promise<void> {
+export async function installBackend(options?: { allowPrompt?: boolean }): Promise<void> {
   const binDir = getBinDir();
   fs.mkdirSync(binDir, { recursive: true });
 
@@ -151,13 +224,20 @@ export async function installBackend(): Promise<void> {
 
   progress.start(`Downloading kulala-core v${KULALA_CORE_VERSION}...`);
   try {
-    await downloadFile(url, downloadPath);
+    await withLicenseToken({
+      allowPrompt: options?.allowPrompt ?? true,
+      download: async (token) => {
+        await downloadFile(url, downloadPath, token);
+      },
+    });
     makeExecutable(downloadPath);
     fs.renameSync(downloadPath, binPath);
+    await assertCoreStarts(binPath);
     fs.writeFileSync(getVersionPath(), KULALA_CORE_VERSION, 'utf-8');
     progress.succeed(`Installed kulala-core to ${binPath}`);
   } catch (error) {
     progress.fail();
+    if (fs.existsSync(downloadPath)) fs.unlinkSync(downloadPath);
     throw error;
   }
 }
@@ -176,12 +256,18 @@ export async function tryInstallBackend(): Promise<void> {
     return;
   }
 
+  if (!process.env.KULALA_CORE_LICENSE_TOKEN?.trim() && !readSavedLicenseToken()) {
+    console.error(`Warning: ${LICENSE_TOKEN_HELP}`);
+    console.error('kulala-fmt will ask for a license token on first use.');
+    return;
+  }
+
   if (binaryExists()) {
     removeStaleBinary();
   }
 
   try {
-    await installBackend();
+    await installBackend({ allowPrompt: false });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`Warning: failed to download kulala-core during install: ${message}`);
@@ -206,7 +292,7 @@ export async function ensureInstalled(): Promise<string> {
     removeStaleBinary();
   }
 
-  await installBackend();
+  await installBackend({ allowPrompt: true });
   return getBinPath();
 }
 

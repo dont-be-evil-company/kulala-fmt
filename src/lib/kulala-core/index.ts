@@ -86,6 +86,39 @@ export async function formatHttp(content: string, options: FormatOptions = {}): 
   return response.formatted;
 }
 
+export type FormatJsonOptions = {
+  indent?: number;
+  expand_tabs?: boolean;
+  sort_keys?: boolean;
+  text?: string;
+};
+
+export async function ensureKulalaCore(override?: string): Promise<string> {
+  return executablePath(override);
+}
+
+export function formatJsonSync(value: unknown, opts: FormatJsonOptions = {}): string {
+  const payload: Record<string, unknown> = {
+    action: 'format_json',
+    indent: opts.indent,
+    expand_tabs: opts.expand_tabs,
+    sort_keys: opts.sort_keys,
+  };
+  if (opts.text !== undefined) payload.text = opts.text;
+  else payload.value = value;
+
+  const response = invoke(payload) as { success?: boolean; content?: string; error?: string };
+  if (!response.success || typeof response.content !== 'string') {
+    throw new Error(response.error || 'kulala-core format_json failed');
+  }
+  return response.content;
+}
+
+export async function formatJson(value: unknown, opts: FormatJsonOptions = {}): Promise<string> {
+  await executablePath();
+  return formatJsonSync(value, opts);
+}
+
 export async function parseHttp(content: string, filepath?: string): Promise<KulalaParsedDocument> {
   await executablePath();
 
@@ -99,4 +132,7 @@ export async function parseHttp(content: string, filepath?: string): Promise<Kul
 export const kulalaCore = {
   formatHttp,
   parseHttp,
+  ensureKulalaCore,
+  formatJson,
+  formatJsonSync,
 };

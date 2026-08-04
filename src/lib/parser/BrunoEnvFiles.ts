@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { formatJson } from '../kulala-core';
 
 export interface KulalaOAuth2PublicConfig {
   Type: 'OAuth2';
@@ -96,10 +97,10 @@ export function buildHttpClientPrivateEnvJson(
   return hasSecrets ? file : null;
 }
 
-export function writeHttpClientEnvFiles(
+export async function writeHttpClientEnvFiles(
   environments: BrunoEnvironment[],
   outputDir: string = process.cwd(),
-): { wrotePublic: boolean; wrotePrivate: boolean } {
+): Promise<{ wrotePublic: boolean; wrotePrivate: boolean }> {
   let wrotePublic = false;
   let wrotePrivate = false;
 
@@ -108,14 +109,14 @@ export function writeHttpClientEnvFiles(
 
   if (hasPublicVars) {
     const envPath = path.join(outputDir, 'http-client.env.json');
-    fs.writeFileSync(envPath, JSON.stringify(envFile, null, 2) + '\n', 'utf-8');
+    fs.writeFileSync(envPath, (await formatJson(envFile)) + '\n', 'utf-8');
     wrotePublic = true;
   }
 
   const privateEnvFile = buildHttpClientPrivateEnvJson(environments);
   if (privateEnvFile) {
     const privateEnvPath = path.join(outputDir, 'http-client.private.env.json');
-    fs.writeFileSync(privateEnvPath, JSON.stringify(privateEnvFile, null, 2) + '\n', 'utf-8');
+    fs.writeFileSync(privateEnvPath, (await formatJson(privateEnvFile)) + '\n', 'utf-8');
     wrotePrivate = true;
   }
 

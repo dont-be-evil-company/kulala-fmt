@@ -1,5 +1,6 @@
 import { basename, dirname, resolve } from 'path';
 import { readFileSync } from 'fs';
+import { formatJsonSync } from '../kulala-core';
 import type { KulalaParsedDocument } from '../kulala-core/types';
 
 interface PostmanVariable {
@@ -166,7 +167,7 @@ function buildPostmanRequest(block: KulalaParsedDocument['blocks'][number]): Pos
     typeof block.request.body === 'string'
       ? block.request.body
       : block.request.body
-        ? JSON.stringify(block.request.body, null, 2)
+        ? formatJsonSync(block.request.body)
         : block.request.sourceBodyText;
 
   if (body) {

@@ -1,3 +1,4 @@
+import { formatJsonSync } from '../kulala-core';
 import type { Document, Block, Header } from './DocumentParser';
 
 interface OpenAPIServer {
@@ -479,10 +480,10 @@ export class OpenAPIDocumentParser implements OpenAPIParser {
 
         const mediaTypeObject = requestBody.content[preferred];
         if (mediaTypeObject?.example) {
-          block.request.body = JSON.stringify(mediaTypeObject.example, null, 2);
+          block.request.body = formatJsonSync(mediaTypeObject.example);
         } else if (mediaTypeObject?.schema) {
           const example = this.generateExampleFromSchema(mediaTypeObject.schema, spec);
-          block.request.body = JSON.stringify(example, null, 2);
+          if (example !== undefined) block.request.body = formatJsonSync(example);
         }
       }
     }

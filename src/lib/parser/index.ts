@@ -205,6 +205,7 @@ export const format = async (
 };
 
 const convertFromOpenAPI = async (files: string[]): Promise<void> => {
+  await kulalaCore.ensureKulalaCore();
   for (const file of files) {
     const json = getOpenAPISpecAsJSON(file);
     const { documents, serverUrls } = OpenAPIParser.parse(json);
@@ -224,7 +225,7 @@ const convertFromPostman = async (files: string[]): Promise<void> => {
 
     if (isPostmanEnvironment(json)) {
       const environments = parsePostmanEnvironment(json);
-      const { wrotePublic, wrotePrivate } = writeHttpClientEnvFiles(environments, outputDir);
+      const { wrotePublic, wrotePrivate } = await writeHttpClientEnvFiles(environments, outputDir);
 
       if (wrotePublic) {
         console.log(
@@ -255,7 +256,7 @@ const convertFromPostman = async (files: string[]): Promise<void> => {
     console.log(chalk.green(`Converted PostMan Collection file: ${file} --> ${outputFilename}`));
 
     if (environments.length > 0) {
-      const { wrotePublic, wrotePrivate } = writeHttpClientEnvFiles(environments, outputDir);
+      const { wrotePublic, wrotePrivate } = await writeHttpClientEnvFiles(environments, outputDir);
 
       if (wrotePublic) {
         console.log(chalk.green('Wrote environment variables --> http-client.env.json'));
@@ -275,7 +276,7 @@ const convertFromBruno = async (files: string[]): Promise<void> => {
   console.log(chalk.green(`Converted Bruno collection: ${files[0]} --> ${outputFilename}`));
 
   if (environments.length > 0) {
-    const { wrotePublic, wrotePrivate } = writeHttpClientEnvFiles(environments);
+    const { wrotePublic, wrotePrivate } = await writeHttpClientEnvFiles(environments);
 
     if (wrotePublic) {
       console.log(chalk.green('Wrote environment variables --> http-client.env.json'));
@@ -345,7 +346,7 @@ const convertToPostman = async (
       ? httpFiles[0]!.replace(/\.(http|rest)$/i, '.postman_collection.json')
       : `${collectionName}.postman_collection.json`);
 
-  fs.writeFileSync(outputFilename, JSON.stringify(collection, null, 2), 'utf-8');
+  fs.writeFileSync(outputFilename, await kulalaCore.formatJson(collection), 'utf-8');
   console.log(chalk.green(`Converted ${httpFiles.length} HTTP file(s) --> ${outputFilename}`));
 };
 
