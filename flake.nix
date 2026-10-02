@@ -28,7 +28,7 @@
           runtimeInputs = [pkgs.nodejs];
           text = ''
             # Run kulala-fmt using npx
-            exec npx github:mistweaverco/kulala-fmt "$@"
+            exec npx github:dont-be-evil-company/kulala-fmt "$@"
           '';
         };
       in {
