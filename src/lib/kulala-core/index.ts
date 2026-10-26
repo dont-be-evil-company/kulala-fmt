@@ -1,5 +1,5 @@
-import { spawnSync } from 'child_process';
 import { downloader } from '../downloader';
+import { createDaemonClient, defaultKulalaCoreDataDir } from './daemon-client';
 import { configparser } from '../configparser';
 import type { KulalaParsedDocument } from './types';
 import type { Config } from '../configparser';
@@ -27,6 +27,17 @@ type FormatResponse = FormatSuccess | FormatFailure;
 
 let cachedExecutable: string | null = null;
 
+const daemon = createDaemonClient({
+  clientName: 'kulala-fmt',
+  dataDir: defaultKulalaCoreDataDir,
+  executable: () => {
+    if (!cachedExecutable) {
+      throw new Error('kulala-core executable not resolved');
+    }
+    return cachedExecutable;
+  },
+});
+
 async function executablePath(override?: string): Promise<string> {
   if (override && override.trim()) {
     cachedExecutable = override.trim();
@@ -36,33 +47,18 @@ async function executablePath(override?: string): Promise<string> {
   return cachedExecutable;
 }
 
-function invoke(payload: Record<string, unknown>): unknown {
-  const exe = cachedExecutable;
-  if (!exe) {
+async function invoke(payload: Record<string, unknown>): Promise<unknown> {
+  if (!cachedExecutable) {
     throw new Error('kulala-core executable not resolved');
   }
-
-  const result = spawnSync(exe, [], {
-    input: `${JSON.stringify(payload)}\n`,
-    encoding: 'utf-8',
-    maxBuffer: 50 * 1024 * 1024,
-  });
-
-  if (result.error) {
-    throw result.error;
+  const result = await daemon.invoke(payload, { track: 'none' });
+  if (result.code !== 0) {
+    throw new Error(result.stderr.trim() || `kulala-core exited with code ${result.code}`);
   }
-
-  if (result.status !== 0) {
-    throw new Error(
-      result.stderr?.trim() || `kulala-core exited with code ${result.status ?? 'unknown'}`,
-    );
-  }
-
-  const stdout = result.stdout?.trim();
+  const stdout = result.stdout.trim();
   if (!stdout) {
     throw new Error('kulala-core returned empty output');
   }
-
   return JSON.parse(stdout);
 }
 
@@ -70,14 +66,14 @@ export async function formatHttp(content: string, options: FormatOptions = {}): 
   await executablePath(options.kulalaCoreExecutablePath);
   const config = options.config ?? configparser.parse();
 
-  const response = invoke({
+  const response = (await invoke({
     action: 'format',
     content,
     filepath: options.filepath,
     formatBody: options.formatBody ?? true,
     bodyFormat: config.body.format,
     defaults: config.defaults,
-  }) as FormatResponse;
+  })) as FormatResponse;
 
   if (!response.success) {
     throw new Error(response.error);
@@ -107,7 +103,15 @@ export function formatJsonSync(value: unknown, opts: FormatJsonOptions = {}): st
   if (opts.text !== undefined) payload.text = opts.text;
   else payload.value = value;
 
-  const response = invoke(payload) as { success?: boolean; content?: string; error?: string };
+  const result = daemon.invokeSync(payload);
+  if (result.code !== 0) {
+    throw new Error(result.stderr.trim() || `kulala-core exited with code ${result.code}`);
+  }
+  const response = JSON.parse(result.stdout) as {
+    success?: boolean;
+    content?: string;
+    error?: string;
+  };
   if (!response.success || typeof response.content !== 'string') {
     throw new Error(response.error || 'kulala-core format_json failed');
   }
@@ -122,11 +126,11 @@ export async function formatJson(value: unknown, opts: FormatJsonOptions = {}): 
 export async function parseHttp(content: string, filepath?: string): Promise<KulalaParsedDocument> {
   await executablePath();
 
-  return invoke({
+  return (await invoke({
     action: 'parse',
     content,
     filepath,
-  }) as KulalaParsedDocument;
+  })) as KulalaParsedDocument;
 }
 
 export const kulalaCore = {
