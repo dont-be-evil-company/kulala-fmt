@@ -133,10 +133,16 @@ export async function parseHttp(content: string, filepath?: string): Promise<Kul
   })) as KulalaParsedDocument;
 }
 
+/** Let the process exit. The kulala-core daemon stays up for the next command. */
+export function release(): void {
+  daemon.release();
+}
+
 export const kulalaCore = {
   formatHttp,
   parseHttp,
   ensureKulalaCore,
   formatJson,
   formatJsonSync,
+  release,
 };

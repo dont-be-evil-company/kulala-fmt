@@ -2,6 +2,7 @@ import pkg from './../package.json';
 import { Command } from 'commander';
 import { check, convert, format } from './lib/parser';
 import { configparser } from './lib/configparser';
+import { kulalaCore } from './lib/kulala-core';
 const program = new Command();
 
 program
@@ -50,4 +51,15 @@ program
     configparser.init();
   });
 
-program.parse();
+async function main(): Promise<void> {
+  try {
+    await program.parseAsync();
+  } finally {
+    kulalaCore.release();
+  }
+}
+
+main().catch((error: unknown) => {
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exit(1);
+});

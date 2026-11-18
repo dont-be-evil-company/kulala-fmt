@@ -86,6 +86,8 @@ export type DaemonClient = {
   cancel(id: string): void;
   cancelActive(): boolean;
   cancelAll(): boolean;
+  /** Drop the process reference to the daemon socket. The daemon keeps running. */
+  release(): void;
   openWebSocket(
     connect: Record<string, unknown>,
     handlers: {
@@ -1092,6 +1094,10 @@ export function createDaemonClient(options: DaemonClientOptions): DaemonClient {
       if (ids.length === 0) return false;
       for (const id of ids) cancel(id);
       return true;
+    },
+    release() {
+      if (socket && !socket.destroyed) socket.unref();
+      worker?.unref();
     },
     openWebSocket,
   };

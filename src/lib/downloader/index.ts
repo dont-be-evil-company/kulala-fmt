@@ -7,6 +7,7 @@ import { KULALA_CORE_VERSION } from '../../versions/backend';
 import {
   KULALA_CORE_DOWNLOAD_URL,
   LICENSE_TOKEN_HELP,
+  promptHiddenLicenseToken,
   readSavedLicenseToken,
   throwIfLicenseRejected,
   withLicenseToken,
@@ -221,12 +222,24 @@ export async function installBackend(options?: { allowPrompt?: boolean }): Promi
   const downloadPath = path.join(binDir, `${releaseName}.download`);
   const binPath = getBinPath();
   const progress = createDownloadProgress();
+  let showing = false;
+  const prompt = async (): Promise<string> => {
+    if (showing) {
+      progress.fail();
+      showing = false;
+    }
+    return promptHiddenLicenseToken();
+  };
 
-  progress.start(`Downloading kulala-core v${KULALA_CORE_VERSION}...`);
   try {
     await withLicenseToken({
       allowPrompt: options?.allowPrompt ?? true,
+      prompt,
       download: async (token) => {
+        if (!showing) {
+          progress.start(`Downloading kulala-core v${KULALA_CORE_VERSION}...`);
+          showing = true;
+        }
         await downloadFile(url, downloadPath, token);
       },
     });
