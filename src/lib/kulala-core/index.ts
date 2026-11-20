@@ -70,6 +70,7 @@ export async function formatHttp(content: string, options: FormatOptions = {}): 
     action: 'format',
     content,
     filepath: options.filepath,
+    cwd: process.cwd(),
     formatBody: options.formatBody ?? true,
     bodyFormat: config.body.format,
     defaults: config.defaults,

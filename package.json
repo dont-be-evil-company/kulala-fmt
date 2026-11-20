@@ -1,9 +1,9 @@
 {
   "name": "@dont-be-evil-company/kulala-fmt",
-  "version": "4.8.1",
+  "version": "4.8.2",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dont-be-evil-company/kulala-fmt"
+    "url": "git+https://github.com/dont-be-evil-company/kulala-fmt.git"
   },
   "bin": {
     "kulala-fmt": "dist/cli.cjs"
